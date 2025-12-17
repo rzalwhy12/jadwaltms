@@ -1,0 +1,201 @@
+@import "tailwindcss";
+
+* {
+  margin: 0;
+  padding: 2;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: auto;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+/* Print Styles */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0.3cm 0.8cm;
+  }
+
+  body {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  header,
+  footer,
+  .print\:hidden {
+    display: none !important;
+  }
+  
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100%;
+  }
+  .print-heading {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  table {
+    page-break-inside: auto;
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid black !important;
+    font-size: 11pt;
+  }
+
+  table,
+  th,
+  td,
+  tr {
+    background: white !important;
+    color: black !important;
+    border-color: black !important;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  thead th {
+    padding: 8px 4px !important;
+    font-size: 10pt;
+  }
+  
+  tbody td {
+    padding: 6px 4px !important;
+    font-size: 10pt;
+  }
+
+  tbody tr {
+    page-break-inside: avoid !important;
+    page-break-after: auto;
+  }
+
+  /* Ensure borders stay visible and no shading */
+  th,
+  td,
+  tr {
+    background: white !important;
+    color: black !important;
+    border-color: black !important;
+  }
+
+  h1 {
+    page-break-after: avoid;
+    margin-bottom: 8px;
+    font-size: 24pt;
+  }
+
+  h1 + p {
+    margin-bottom: 12px;
+    font-size: 12pt;
+  }
+  
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color: black !important;
+  }
+
+  /* Avoid breaking inside card content */
+  .overflow-x-auto,
+  .inline-block,
+  .overflow-hidden {
+    overflow: visible !important;
+  }
+
+  /* Force page break every 15 rows */
+  .print\:break-before-page {
+    page-break-before: always !important;
+    break-before: page !important;
+  }
+
+  /* Prevent orphaned content and empty pages */
+  body,
+  html {
+    orphans: 2;
+    widows: 2;
+  }
+
+  /* Avoid extra space after table */
+  table:last-of-type {
+    page-break-after: avoid;
+  }
+
+  /* Hide badges and icons styling in print */
+  .rounded-full {
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  /* Simplify table appearance */
+  .bg-linear-to-r,
+  .bg-linear-to-br {
+    background: white !important;
+  }
+}
