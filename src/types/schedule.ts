@@ -9,6 +9,7 @@ export interface Schedule {
   endTime: string;
   instrument: Instrument;
   studentName: string;
+  teacherName: string;
 }
 
 export type SortBy = 'day' | 'time';

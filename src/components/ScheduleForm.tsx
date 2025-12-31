@@ -29,6 +29,7 @@
         endTime: initialData?.endTime || '',
         instrument: (initialData?.instrument || 'Piano') as Instrument,
         studentName: initialData?.studentName || '',
+        teacherName: initialData?.teacherName || '',
     });
 
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -41,6 +42,7 @@
             endTime: initialData.endTime,
             instrument: initialData.instrument,
             studentName: initialData.studentName,
+            teacherName: initialData.teacherName,
         });
         }
     }, [initialData]);
@@ -50,6 +52,10 @@
 
         if (!formData.studentName.trim()) {
         newErrors.studentName = 'Nama siswa harus diisi';
+        }
+
+        if (!formData.teacherName.trim()) {
+        newErrors.teacherName = 'Nama pengajar harus diisi';
         }
 
         if (!formData.startTime) {
@@ -79,6 +85,7 @@
             endTime: '',
             instrument: 'Piano',
             studentName: '',
+            teacherName: '',
             });
         }
         }
@@ -138,6 +145,15 @@
             value={formData.studentName}
             onChange={(e) => handleChange('studentName', e.target.value)}
             error={errors.studentName}
+            />
+
+            <Input
+            label="Nama Pengajar"
+            type="text"
+            placeholder="Masukkan nama pengajar"
+            value={formData.teacherName}
+            onChange={(e) => handleChange('teacherName', e.target.value)}
+            error={errors.teacherName}
             />
 
             <div className="flex gap-3 pt-6 border-t-2 border-gray-200 dark:border-gray-700">

@@ -10,40 +10,48 @@ import { Plus } from 'lucide-react';
 import { 
   sortSchedules, 
   filterSchedulesByDay, 
-  filterSchedulesByInstrument, 
+  filterSchedulesByInstrument,
+  filterSchedulesByTeacher,
+  getAvailableTeachers,
   generateId 
 } from '../utils/helpers';
+import { backendlessService } from '../services/backendless';
 
 export default function Home() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [selectedDay, setSelectedDay] = useState<Day | 'Semua'>('Semua');
   const [selectedInstrument, setSelectedInstrument] = useState<Instrument | 'Semua'>('Semua');
+  const [selectedTeacher, setSelectedTeacher] = useState<string | 'Semua'>('Semua');
   const [sortBy, setSortBy] = useState<SortBy>('day');
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Load schedules from Backendless
   useEffect(() => {
-    const saved = localStorage.getItem('tms-schedules');
-    if (saved) {
+    const loadSchedules = async () => {
       try {
-        setSchedules(JSON.parse(saved));
-      } catch (e) {
-        console.error('Failed to load schedules:', e);
+        setIsLoading(true);
+        const data = await backendlessService.getAllSchedules();
+        setSchedules(data);
+      } catch (error) {
+        console.error('Failed to load schedules from Backendless:', error);
+        // Fallback to localStorage if Backendless fails
+        const saved = localStorage.getItem('tms-schedules');
+        if (saved) {
+          try {
+            setSchedules(JSON.parse(saved));
+          } catch (e) {
+            console.error('Failed to load schedules from localStorage:', e);
+          }
+        }
+      } finally {
+        setIsLoading(false);
       }
-    } else {
-      const sampleSchedules: Schedule[] = [
-        { id: generateId(), day: 'Senin', startTime: '08:00', endTime: '09:00', instrument: 'Piano', studentName: 'John Doe' },
-        { id: generateId(), day: 'Senin', startTime: '10:00', endTime: '11:00', instrument: 'Gitar', studentName: 'Jane Smith' },
-        { id: generateId(), day: 'Rabu', startTime: '09:00', endTime: '10:00', instrument: 'Biola', studentName: 'Grup A' },
-        { id: generateId(), day: 'Jumat', startTime: '15:00', endTime: '16:00', instrument: 'Drum', studentName: 'Michael Johnson' },
-      ];
-      setSchedules(sampleSchedules);
-    }
-  }, []);
+    };
 
-  useEffect(() => {
-    localStorage.setItem('tms-schedules', JSON.stringify(schedules));
-  }, [schedules]);
+    loadSchedules();
+  }, []);
 
   useEffect(() => {
     if (!isModalOpen) return;
@@ -57,23 +65,40 @@ export default function Home() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isModalOpen]);
 
-  const handleAddSchedule = (scheduleData: Omit<Schedule, 'id'>) => {
-    const newSchedule: Schedule = { ...scheduleData, id: generateId() };
-    setSchedules((prev) => [...prev, newSchedule]);
-    setIsModalOpen(false);
-    setEditingSchedule(null);
+  const handleAddSchedule = async (scheduleData: Omit<Schedule, 'id'>) => {
+    try {
+      const newSchedule = await backendlessService.createSchedule(scheduleData);
+      setSchedules((prev) => [...prev, newSchedule]);
+      setIsModalOpen(false);
+      setEditingSchedule(null);
+    } catch (error) {
+      console.error('Failed to add schedule:', error);
+      alert('Gagal menambahkan jadwal. Silakan coba lagi.');
+    }
   };
 
-  const handleUpdateSchedule = (scheduleData: Omit<Schedule, 'id'>) => {
+  const handleUpdateSchedule = async (scheduleData: Omit<Schedule, 'id'>) => {
     if (!editingSchedule) return;
-    setSchedules((prev) => prev.map((s) => (s.id === editingSchedule.id ? { ...scheduleData, id: editingSchedule.id } : s)));
-    setEditingSchedule(null);
-    setIsModalOpen(false);
+    try {
+      const updated = await backendlessService.updateSchedule(editingSchedule.id, scheduleData);
+      setSchedules((prev) => prev.map((s) => (s.id === editingSchedule.id ? updated : s)));
+      setEditingSchedule(null);
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Failed to update schedule:', error);
+      alert('Gagal memperbarui jadwal. Silakan coba lagi.');
+    }
   };
 
-  const handleDeleteSchedule = (id: string) => {
-    setSchedules((prev) => prev.filter((s) => s.id !== id));
-    if (editingSchedule?.id === id) setEditingSchedule(null);
+  const handleDeleteSchedule = async (id: string) => {
+    try {
+      await backendlessService.deleteSchedule(id);
+      setSchedules((prev) => prev.filter((s) => s.id !== id));
+      if (editingSchedule?.id === id) setEditingSchedule(null);
+    } catch (error) {
+      console.error('Failed to delete schedule:', error);
+      alert('Gagal menghapus jadwal. Silakan coba lagi.');
+    }
   };
 
   const handleEditSchedule = (schedule: Schedule) => {
@@ -85,9 +110,14 @@ export default function Home() {
     let result = schedules;
     result = filterSchedulesByDay(result, selectedDay);
     result = filterSchedulesByInstrument(result, selectedInstrument);
+    result = filterSchedulesByTeacher(result, selectedTeacher);
     result = sortSchedules(result, sortBy);
     return result;
-  }, [schedules, selectedDay, selectedInstrument, sortBy]);
+  }, [schedules, selectedDay, selectedInstrument, selectedTeacher, sortBy]);
+
+  const availableTeachers = useMemo(() => {
+    return getAvailableTeachers(schedules);
+  }, [schedules]);
 
   const openCreateModal = () => {
     setEditingSchedule(null);
@@ -101,16 +131,32 @@ export default function Home() {
 
   const isEditingMode = !!editingSchedule;
 
+  if (isLoading) {
+    return (
+      <div className="space-y-12 md:space-y-16">
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">Memuat jadwal...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-12 md:space-y-16">
 
       <FilterControls
         selectedDay={selectedDay}
         selectedInstrument={selectedInstrument}
+        selectedTeacher={selectedTeacher}
         sortBy={sortBy}
         onDayChange={setSelectedDay}
         onInstrumentChange={setSelectedInstrument}
+        onTeacherChange={setSelectedTeacher}
         onSortChange={setSortBy}
+        availableTeachers={availableTeachers}
       />
 
       <ScheduleTable

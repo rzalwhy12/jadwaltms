@@ -84,6 +84,9 @@ export const ScheduleTable: React.FC<ScheduleTableProps> = ({
                   <th className="px-4 py-5 md:py-6 text-center text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider print:px-3 print:py-1 print:text-xs print:font-semibold">
                     Nama Siswa / Grup
                   </th>
+                  <th className="px-4 py-5 md:py-6 text-center text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider print:px-3 print:py-1 print:text-xs print:font-semibold">
+                    Nama Pengajar
+                  </th>
                   <th className="px-4 py-5 md:py-6 text-center text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider print:table-cell print:text-black print:px-3 print:py-1 print:text-xs print:font-semibold">
                     <span className="print:hidden">Aksi</span>
                     <span className="hidden print:inline">Tanda Tangan</span>
@@ -116,6 +119,11 @@ export const ScheduleTable: React.FC<ScheduleTableProps> = ({
                     <td className="px-4 py-5 md:py-6 text-center text-gray-700 dark:text-gray-300 font-medium text-sm sm:text-base">
                       <span className="inline-flex items-center justify-center">
                         <User className="w-4 h-4 mr-1.5" /> {schedule.studentName}
+                      </span>
+                    </td>
+                    <td className="px-4 py-5 md:py-6 text-center text-gray-700 dark:text-gray-300 font-medium text-sm sm:text-base">
+                      <span className="inline-flex items-center justify-center">
+                        <User className="w-4 h-4 mr-1.5" /> {schedule.teacherName}
                       </span>
                     </td>
                     <td className="px-4 py-5 md:py-6 whitespace-nowrap print:table-cell">

@@ -24,6 +24,16 @@ export const filterSchedulesByInstrument = (schedules: Schedule[], instrument: s
   return schedules.filter(schedule => schedule.instrument === instrument);
 };
 
+export const filterSchedulesByTeacher = (schedules: Schedule[], teacher: string): Schedule[] => {
+  if (teacher === 'Semua') return schedules;
+  return schedules.filter(schedule => schedule.teacherName === teacher);
+};
+
+export const getAvailableTeachers = (schedules: Schedule[]): string[] => {
+  const teachers = new Set(schedules.map(schedule => schedule.teacherName));
+  return Array.from(teachers).sort();
+};
+
 export const generateId = (): string => {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
